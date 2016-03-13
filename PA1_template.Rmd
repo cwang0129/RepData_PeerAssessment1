@@ -8,7 +8,8 @@ library(ggplot2)
 ```{r}
 unzip("activity.zip")
 df <- read.csv("activity.csv", header = T, sep = ',', stringsAsFactors = FALSE)
-summary(df)
+a <- summary(df)
+print(a, type="html")
 ```
 
 2. Histogram of the total number of steps taken each day
@@ -16,14 +17,17 @@ summary(df)
 ```{r, echo=TRUE}
 step_perday <- aggregate(df$steps, by = list(df$date),sum, na.rm = T)
 colnames(step_perday) <- c("date","steps")
-ggplot(data = step_perday, aes(x=step_perday$steps)) + geom_histogram(binwidth = 2000, fill = 'lightyellow', col = 'lightblue') 
+b <- ggplot(data = step_perday, aes(x=step_perday$steps)) + geom_histogram(binwidth = 2000, fill = 'lightyellow', col = 'lightblue') 
+print(b,type="html")
 ```
 
 3. Mean and median number of steps taken each day
 
 ```{r}
-mean(step_perday$steps)
-median(step_perday$steps)
+datamean <- mean(step_perday$steps)
+datamedian <- median(step_perday$steps)
+print(datamean, type = "html")
+print(datamedian, type="html")
 ```
 
 4. Time series plot of the average number of steps taken
