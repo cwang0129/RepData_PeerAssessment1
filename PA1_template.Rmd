@@ -1,0 +1,83 @@
+---
+title: "Repdata_Project1"
+output: html_document
+---
+```{r}
+library(ggplot2)
+```
+
+1.Code for reading in the dataset and/or processing the data
+
+```{r}
+df <- read.csv("activity.csv", header = T, sep = ',', stringsAsFactors = FALSE)
+summary(df)
+```
+
+2. Histogram of the total number of steps taken each day
+
+```{r, echo=TRUE}
+step_perday <- aggregate(df$steps, by = list(df$date),sum, na.rm = T)
+colnames(step_perday) <- c("date","steps")
+ggplot(data = step_perday, aes(x=step_perday$steps)) + geom_histogram(binwidth = 2000, fill = 'lightyellow', col = 'lightblue') 
+```
+
+3. Mean and median number of steps taken each day
+
+```{r}
+mean(step_perday$steps)
+median(step_perday$steps)
+```
+
+4. Time series plot of the average number of steps taken
+```{r}
+step_int <- aggregate(df$steps, by=list(df$interval), mean, na.rm = T)
+colnames(step_int) <- c("intervals","steps")
+ggplot(data = step_int, aes(x=intervals, y=steps)) + geom_line(col = 'lightblue', size =1)
+```
+
+5. The 5-minute interval that, on average, contains the maximum number of steps
+```{r}
+step_int[which.max(step_int$steps),]
+```
+
+6. Code to describe and show a strategy for imputing missing data
+```{r}
+df2 = df
+for(i in 1:nrow(df2)){
+    if(is.na(df2$steps[i])){
+        int = df2$interval[i]
+        sub = subset(step_int, intervals == int)
+        df2$steps[i] = sub$steps
+    }
+}
+```
+
+7. Histogram of the total number of steps taken each day after missing values are imputed
+```{r}
+step_int2 <- aggregate(df2$steps, by = list(df2$date), sum)
+ggplot(data = step_int2, aes(x=step_int2$x)) + geom_histogram(binwidth = 2000, fill = 'blue', col = 'black')
+```
+
+8. Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+```{r}
+df2$date = as.Date(df2$date)
+df2$day = factor(format(df2$date, "%A"))
+levels(df2$day) = list(weekday = c("Monday", "Tuesday","Wednesday", "Thursday", "Friday"), weekend = c("Saturday", "Sunday"))
+
+we = subset(df2, df2$day == 'weekend')
+step_int_we = aggregate(we$steps, by=list(we$interval), mean)
+step_int_we$day = 'weekend'
+
+wd = subset(df2, df2$day == 'weekday')
+step_int_wd = aggregate(wd$steps, by=list(wd$interval), mean)
+step_int_wd$day = 'weekday'
+
+step_int_2 = rbind(step_int_we, step_int_wd)
+
+colnames(step_int_2) <- c('interval', 'steps', 'day')
+
+ggplot(data = step_int_2, aes(x = interval, y  = steps)) + facet_grid(day~.) + geom_line(col = 'steelblue', size = 1) + labs(x = 'Interval(5 minuts)', y = 'Average numeber of steps', title ='Time series plot(new)')
+```
+
+
+All of the R code needed to reproduce the results (numbers, plots, etc.) in the report
